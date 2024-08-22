@@ -7,6 +7,6 @@
 		public string Name { get; set; }
 
 		// Relationships
-		public ICollection<Movie> Movies { get; set; }
+		public ICollection<Movie> Movies { get; set; } // many to many with movie
 	}
 }

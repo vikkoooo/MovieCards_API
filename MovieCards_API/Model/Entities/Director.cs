@@ -8,6 +8,6 @@
 		public DateTime DateOfBirth { get; set; }
 
 		// Relationships
-		public ICollection<Movie> Movies { get; set; }
+		public ICollection<Movie> Movies { get; set; } // one to many with movie
 	}
 }

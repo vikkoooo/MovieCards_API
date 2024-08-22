@@ -10,9 +10,9 @@
 		public string Description { get; set; }
 
 		// Relationships
-		public int DirectorId { get; set; }
-		public Director Director { get; set; }
-		public ICollection<Actor> Actors { get; set; }
-		public ICollection<Genre> Genres { get; set; }
+		public int DirectorId { get; set; } // one to many with director
+		public Director Director { get; set; } // one to many with director
+		public ICollection<Actor> Actors { get; set; } // many to many with actor
+		public ICollection<Genre> Genres { get; set; } // many to many with genre
 	}
 }
