@@ -10,25 +10,18 @@ Required Entities: **Movie**:
 >
 > **Relationships**:
 >
-> o
+> One-to-Many with Director.
 >
-> o
+> Many-to-Many with Actor.
 >
-> o
+> Many-to-Many with Genre.
 
 **Director**:
-
-One-to-Many with Director.
-
-Many-to-Many with Actor.
-
-Many-to-Many with Genre.
-
 > Id, Name, DateOfBirth
 >
-> • **Relationship**:
+> **Relationship**:
 >
-> o One-to-One with ContactInformation.
+> One-to-One with ContactInformation.
 
 **Actor**:
 
