@@ -1,7 +1,8 @@
-﻿namespace MovieCards_API.Model
+﻿namespace MovieCards_API.Model.Entities
 {
 	public class Movie
 	{
+		// Props
 		public int Id { get; set; }
 		public string Title { get; set; }
 		public int Rating { get; set; }
