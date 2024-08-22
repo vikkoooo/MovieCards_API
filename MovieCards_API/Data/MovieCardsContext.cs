@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MovieCards_API.Model.Entities;
 
 namespace MovieCards_API.Data
 {
@@ -8,6 +9,6 @@ namespace MovieCards_API.Data
 		{
 		}
 
-		public DbSet<MovieCards_API.Model.Movie> Movie { get; set; } = default!;
+		public DbSet<Movie> Movie { get; set; } = default!;
 	}
 }

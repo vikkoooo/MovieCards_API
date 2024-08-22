@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieCards_API.Data;
-using MovieCards_API.Model;
+using MovieCards_API.Model.Entities;
 
 namespace MovieCards_API.Controllers
 {
