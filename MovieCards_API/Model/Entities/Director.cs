@@ -9,5 +9,7 @@
 
 		// Relationships
 		public ICollection<Movie> Movies { get; set; } // one to many with movie
+
+		public ContactInformation ContactInformation { get; set; } // one to one with contactinformation
 	}
 }
