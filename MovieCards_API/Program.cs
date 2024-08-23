@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using MovieCards_API.Data;
-using MovieCards_API.Extensions;
 
 namespace MovieCards_API
 {
@@ -17,8 +16,18 @@ namespace MovieCards_API
 			builder.Services.AddControllers();
 			var app = builder.Build();
 
-			// seed data
-			await app.SeedDataAsync();
+			// reset db and reseed data on startup
+			using (var scope = app.Services.CreateScope())
+			{
+				var context = scope.ServiceProvider.GetRequiredService<MovieCardsContext>();
+
+				// delete db
+				await context.Database.EnsureDeletedAsync();
+				await context.Database.MigrateAsync();
+
+				// seed data
+				await SeedData.InitAsync(context);
+			}
 
 			app.UseHttpsRedirection();
 			app.UseAuthorization();
