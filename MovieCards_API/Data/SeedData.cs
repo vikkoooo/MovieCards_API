@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using Microsoft.EntityFrameworkCore;
+using MovieCards_API.Model.Entities;
 
 namespace MovieCards_API.Data
 {
@@ -27,24 +28,73 @@ namespace MovieCards_API.Data
 			await context.SaveChangesAsync();
 		}
 
-		private static object[] GenerateDirectors(int v)
+		private static List<Director> GenerateDirectors(int n)
 		{
-			throw new NotImplementedException();
+			var directors = new List<Director>(n);
+
+			for (int i = 0; i < n; i++)
+			{
+				var director = new Director
+				{
+					Name = faker.Name.FullName(),
+					DateOfBirth = new DateTime(faker.Random.Int(1920, 2024), faker.Random.Int(1, 12), faker.Random.Int(1, 28))
+				};
+				directors.Add(director);
+			}
+			return directors;
 		}
 
-		private static object[] GenerateActors(int v)
+		private static List<Actor> GenerateActors(int n)
 		{
-			throw new NotImplementedException();
+			var actors = new List<Actor>(n);
+
+			for (int i = 0; i < n; i++)
+			{
+				var actor = new Actor
+				{
+					Name = faker.Name.FullName(),
+					DateOfBirth = new DateTime(faker.Random.Int(1920, 2024), faker.Random.Int(1, 12), faker.Random.Int(1, 28))
+				};
+				actors.Add(actor);
+			}
+			return actors;
 		}
 
-		private static object[] GenerateGenres(int v)
+		private static List<Genre> GenerateGenres(int n)
 		{
-			throw new NotImplementedException();
+			var genres = new List<Genre>(n);
+
+			for (int i = 0; i < n; i++)
+			{
+				var genre = new Genre
+				{
+					Name = faker.Music.Genre(),
+				};
+				genres.Add(genre);
+			}
+			return genres;
 		}
 
-		private static object[] GenerateMovies(int v, object[] directors, object[] actors, object[] genres)
+		private static IEnumerable<Movie> GenerateMovies(int n, List<Director> directors, List<Actor> actors, List<Genre> genres)
 		{
-			throw new NotImplementedException();
+			var movies = new List<Movie>(n);
+
+			for (int i = 0; i < n; i++)
+			{
+				var movie = new Movie
+				{
+					Title = faker.Vehicle.Model(),
+					Rating = faker.Random.Int(1, 5),
+					ReleaseDate = new DateTime(faker.Random.Int(1920, 2024), 1, 1),
+					Description = faker.Lorem.Sentences(),
+
+					Director = faker.Random.ListItem(directors),
+					Actors = faker.Random.ListItems(actors, faker.Random.Int(2, 6)).ToList(),
+					Genres = faker.Random.ListItems(genres, faker.Random.Int(1, 3)).ToList(),
+				};
+				movies.Add(movie);
+			}
+			return movies;
 		}
 	}
 }
