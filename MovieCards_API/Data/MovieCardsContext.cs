@@ -9,6 +9,6 @@ namespace MovieCards_API.Data
 		{
 		}
 
-		public DbSet<Movie> Movie { get; set; } = default!;
+		public DbSet<Movie> Movie { get; set; }
 	}
 }
