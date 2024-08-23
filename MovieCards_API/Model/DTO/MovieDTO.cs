@@ -1,4 +1,4 @@
-﻿namespace MovieCards_API.Model
+﻿namespace MovieCards_API.Model.DTO
 {
 	public class MovieDTO
 	{
