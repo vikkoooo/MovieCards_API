@@ -39,18 +39,28 @@ namespace MovieCards_API.Controllers
 			return Ok(dtoList);
 		}
 
-		// GET: api/Movies/5
+		// GET: api/movies/5
 		[HttpGet("{id}")]
 		public async Task<ActionResult<Movie>> GetMovie(int id)
 		{
-			var movie = await context.Movie.FindAsync(id);
+			var dto = await context.Movie
+				.Where(m => m.Id == id)
+				.Select(m => new MovieDTO
+				{
+					Title = m.Title,
+					ReleaseDate = m.ReleaseDate,
+					Description = m.Description,
+					DirectorName = m.Director.Name,
+					ActorNames = m.Actors.Select(a => a.Name).ToList(),
+					GenreNames = m.Genres.Select(g => g.Name).ToList()
+				}).FirstOrDefaultAsync();
 
-			if (movie == null)
+			if (dto == null)
 			{
 				return NotFound();
 			}
 
-			return movie;
+			return Ok(dto);
 		}
 
 		// PUT: api/Movies/5
