@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using MovieCards_API.Data;
+using MovieCards_API.Extensions;
 
 namespace MovieCards_API
 {
 	public class Program
 	{
-		public static void Main(string[] args)
+		public static async Task Main(string[] args)
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,9 @@ namespace MovieCards_API
 
 			builder.Services.AddControllers();
 			var app = builder.Build();
+
+			// seed data
+			await app.SeedDataAsync();
 
 			app.UseHttpsRedirection();
 			app.UseAuthorization();
