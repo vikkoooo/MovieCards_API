@@ -42,7 +42,7 @@ namespace MovieCards_API.Controllers
 
 		// GET: api/movies/5
 		[HttpGet("{id}")]
-		public async Task<ActionResult<Movie>> GetMovie(int id)
+		public async Task<ActionResult<MovieDTO>> GetMovie(int id)
 		{
 			var dto = await context.Movie
 				.Where(m => m.Id == id)
