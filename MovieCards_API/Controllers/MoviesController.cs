@@ -65,8 +65,63 @@ namespace MovieCards_API.Controllers
 			return Ok(dto);
 		}
 
-		// PUT: api/Movies/5
-		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+		// POST: api/movies
+		[HttpPost]
+		public async Task<ActionResult<MovieDTO>> PostMovie(MovieForCreationDTO movieCreateDto)
+		{
+			// make sure all user inputs are parsable
+			if (!DateTime.TryParse(movieCreateDto.ReleaseDate, out DateTime releaseDate))
+			{
+				return BadRequest("Invalid date format (YYYY-MM-DD)");
+			}
+
+			var director = await context.Director.FindAsync(movieCreateDto.DirectorId);
+			if (director == null)
+			{
+				return BadRequest("Director not found");
+			}
+
+			var actors = await context.Actor.Where(a => movieCreateDto.ActorIds.Contains(a.Id)).ToListAsync();
+			if (actors.Count != movieCreateDto.ActorIds.Count)
+			{
+				return BadRequest("Actors not found");
+			}
+
+			var genres = await context.Genre.Where(g => movieCreateDto.GenreIds.Contains(g.Id)).ToListAsync();
+			if (genres.Count != movieCreateDto.GenreIds.Count)
+			{
+				return BadRequest("Genres not found");
+			}
+
+			var movie = new Movie
+			{
+				Title = movieCreateDto.Title,
+				Rating = movieCreateDto.Rating,
+				ReleaseDate = releaseDate,
+				Description = movieCreateDto.Description,
+				Director = director,
+				Actors = actors,
+				Genres = genres
+			};
+
+			context.Movie.Add(movie);
+			await context.SaveChangesAsync();
+
+			var resultDto = new MovieDTO
+			{
+				Title = movie.Title,
+				Rating = movie.Rating,
+				ReleaseDate = movie.ReleaseDate,
+				Description = movie.Description,
+				DirectorName = movie.Director.Name,
+				ActorNames = movie.Actors.Select(a => a.Name).ToList(),
+				GenreNames = movie.Genres.Select(g => g.Name).ToList()
+			};
+
+			return CreatedAtAction(nameof(GetMovie), new { id = movie.Id }, resultDto);
+		}
+
+		// PUT: api/movies/5
 		[HttpPut("{id}")]
 		public async Task<IActionResult> PutMovie(int id, Movie movie)
 		{
@@ -96,16 +151,6 @@ namespace MovieCards_API.Controllers
 			return NoContent();
 		}
 
-		// POST: api/Movies
-		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-		[HttpPost]
-		public async Task<ActionResult<Movie>> PostMovie(Movie movie)
-		{
-			context.Movie.Add(movie);
-			await context.SaveChangesAsync();
-
-			return CreatedAtAction("GetMovie", new { id = movie.Id }, movie);
-		}
 
 		// DELETE: api/Movies/5
 		[HttpDelete("{id}")]
