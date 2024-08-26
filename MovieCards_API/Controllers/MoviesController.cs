@@ -226,25 +226,20 @@ namespace MovieCards_API.Controllers
 		}
 
 
-		// DELETE: api/Movies/5
+		// DELETE: api/movies/5
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteMovie(int id)
 		{
 			var movie = await context.Movie.FindAsync(id);
 			if (movie == null)
 			{
-				return NotFound();
+				return NotFound("ID not found");
 			}
 
 			context.Movie.Remove(movie);
 			await context.SaveChangesAsync();
 
 			return NoContent();
-		}
-
-		private bool MovieExists(int id)
-		{
-			return context.Movie.Any(e => e.Id == id);
 		}
 	}
 }
