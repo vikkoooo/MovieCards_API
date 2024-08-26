@@ -18,10 +18,13 @@ namespace MovieCards_API.Data
 
 			var directors = GenerateDirectors(10);
 			await context.AddRangeAsync(directors);
+
 			var actors = GenerateActors(10);
 			await context.AddRangeAsync(actors);
+
 			var genres = GenerateGenres(10);
 			await context.AddRangeAsync(genres);
+
 			var movies = GenerateMovies(20, directors, actors, genres);
 			await context.AddRangeAsync(movies);
 
@@ -39,6 +42,9 @@ namespace MovieCards_API.Data
 					Name = faker.Name.FullName(),
 					DateOfBirth = new DateTime(faker.Random.Int(1920, 2024), faker.Random.Int(1, 12), faker.Random.Int(1, 28))
 				};
+
+				director.ContactInformation = GenerateContactInformation();
+
 				directors.Add(director);
 			}
 			return directors;
@@ -92,9 +98,22 @@ namespace MovieCards_API.Data
 					Actors = faker.Random.ListItems(actors, faker.Random.Int(2, 6)).ToList(),
 					Genres = faker.Random.ListItems(genres, faker.Random.Int(1, 3)).ToList(),
 				};
+
 				movies.Add(movie);
 			}
+
 			return movies;
+		}
+
+		private static ContactInformation GenerateContactInformation()
+		{
+			var contactInfo = new ContactInformation
+			{
+				Email = faker.Internet.Email(),
+				PhoneNumber = faker.Phone.PhoneNumber()
+			};
+
+			return contactInfo;
 		}
 	}
 }
