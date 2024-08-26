@@ -225,11 +225,15 @@ namespace MovieCards_API.Controllers
 			return Ok(resultDto);
 		}
 
-
 		// DELETE: api/movies/5
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteMovie(int id)
 		{
+			if (id <= 0)
+			{
+				return BadRequest("Invalid ID");
+			}
+
 			var movie = await context.Movie.FindAsync(id);
 			if (movie == null)
 			{
