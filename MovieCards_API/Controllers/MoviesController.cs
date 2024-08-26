@@ -72,7 +72,7 @@ namespace MovieCards_API.Controllers
 			// make sure all user inputs are parsable
 			if (!DateTime.TryParse(movieCreateDto.ReleaseDate, out DateTime releaseDate))
 			{
-				return BadRequest("Invalid date format (YYYY-MM-DD)");
+				return BadRequest("Invalid date format. Please use YYYY-MM-DD");
 			}
 
 			var director = await context.Director.FindAsync(movieCreateDto.DirectorId);
@@ -107,6 +107,7 @@ namespace MovieCards_API.Controllers
 			context.Movie.Add(movie);
 			await context.SaveChangesAsync();
 
+			// return result feedback to api user
 			var resultDto = new MovieDTO
 			{
 				Title = movie.Title,
@@ -123,11 +124,79 @@ namespace MovieCards_API.Controllers
 
 		// PUT: api/movies/5
 		[HttpPut("{id}")]
-		public async Task<IActionResult> PutMovie(int id, Movie movie)
+		public async Task<IActionResult> PutMovie(int id, MovieForUpdateDTO movieUpdateDto)
 		{
-			if (id != movie.Id)
+			// validate input param id
+			if (id <= 0)
 			{
-				return BadRequest();
+				return BadRequest("Invalid ID");
+			}
+
+			// find existing movie by id or return notfound
+			var movie = await context.Movie
+				.Include(m => m.Director)
+				.Include(m => m.Actors)
+				.Include(m => m.Genres)
+				.FirstOrDefaultAsync(m => m.Id == id);
+
+			if (movie == null)
+			{
+				return NotFound("ID not found");
+			}
+
+			// check for changes in the input fields, only update if changed
+			if (!string.IsNullOrEmpty(movieUpdateDto.Title))
+			{
+				movie.Title = movieUpdateDto.Title;
+			}
+
+			if (movieUpdateDto.Rating > 0 && movieUpdateDto.Rating <= 5)
+			{
+				movie.Rating = movieUpdateDto.Rating;
+			}
+
+			if (!string.IsNullOrEmpty(movieUpdateDto.ReleaseDate))
+			{
+				if (!DateTime.TryParse(movieUpdateDto.ReleaseDate, out DateTime releaseDate))
+				{
+					return BadRequest("Invalid date format. Please use YYYY-MM-DD");
+				}
+				movie.ReleaseDate = releaseDate;
+			}
+
+			if (!string.IsNullOrEmpty(movieUpdateDto.Description))
+			{
+				movie.Description = movieUpdateDto.Description;
+			}
+
+			if (movieUpdateDto.DirectorId > 0)
+			{
+				var director = await context.Director.FindAsync(movieUpdateDto.DirectorId);
+				if (director == null)
+				{
+					return BadRequest("Director not found");
+				}
+				movie.DirectorId = movieUpdateDto.DirectorId;
+			}
+
+			if (movieUpdateDto.ActorIds != null)
+			{
+				var actors = await context.Actor.Where(a => movieUpdateDto.ActorIds.Contains(a.Id)).ToListAsync();
+				if (actors.Count != movieUpdateDto.ActorIds.Count)
+				{
+					return BadRequest("Actors not found");
+				}
+				movie.Actors = actors;
+			}
+
+			if (movieUpdateDto.GenreIds != null)
+			{
+				var genres = await context.Genre.Where(g => movieUpdateDto.GenreIds.Contains(g.Id)).ToListAsync();
+				if (genres.Count != movieUpdateDto.GenreIds.Count)
+				{
+					return BadRequest("Genres not found");
+				}
+				movie.Genres = genres;
 			}
 
 			context.Entry(movie).State = EntityState.Modified;
@@ -136,19 +205,24 @@ namespace MovieCards_API.Controllers
 			{
 				await context.SaveChangesAsync();
 			}
-			catch (DbUpdateConcurrencyException)
+			catch (Exception ex)
 			{
-				if (!MovieExists(id))
-				{
-					return NotFound();
-				}
-				else
-				{
-					throw;
-				}
+				throw new Exception(ex.Message);
 			}
 
-			return NoContent();
+			// return result feedback to api user
+			var resultDto = new MovieDTO
+			{
+				Title = movie.Title,
+				Rating = movie.Rating,
+				ReleaseDate = movie.ReleaseDate,
+				Description = movie.Description,
+				DirectorName = movie.Director.Name,
+				ActorNames = movie.Actors.Select(a => a.Name).ToList(),
+				GenreNames = movie.Genres.Select(g => g.Name).ToList()
+			};
+
+			return Ok(resultDto);
 		}
 
 
