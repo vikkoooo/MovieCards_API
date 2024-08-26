@@ -24,6 +24,7 @@ namespace MovieCards_API.Controllers
 			var dtoList = await context.Movie.Select(m => new MovieDTO
 			{
 				Title = m.Title,
+				Rating = m.Rating,
 				ReleaseDate = m.ReleaseDate,
 				Description = m.Description,
 				DirectorName = m.Director.Name,
@@ -48,6 +49,7 @@ namespace MovieCards_API.Controllers
 				.Select(m => new MovieDTO
 				{
 					Title = m.Title,
+					Rating = m.Rating,
 					ReleaseDate = m.ReleaseDate,
 					Description = m.Description,
 					DirectorName = m.Director.Name,
