@@ -1,23 +1,23 @@
 ﻿namespace MovieCards_API.Model.DTO
 {
-	public class MovieDetailsDTO
+	public record MovieDetailsDTO
 	{
 		// movie
-		public string Title { get; set; }
-		public int Rating { get; set; }
-		public DateTime ReleaseDate { get; set; }
-		public string Description { get; set; }
+		public string Title { get; init; }
+		public int Rating { get; init; }
+		public DateTime ReleaseDate { get; init; }
+		public string Description { get; init; }
 
 		// director
-		public string DirectorName { get; set; }
-		public DateTime DirectorDateOfBirth { get; set; }
+		public string DirectorName { get; init; }
+		public DateTime DirectorDateOfBirth { get; init; }
 
 		// director contact info
-		public string DirectorEmail { get; set; }
-		public string DirectorPhoneNumber { get; set; }
+		public string DirectorEmail { get; init; }
+		public string DirectorPhoneNumber { get; init; }
 
 		// actors & genres
-		public ICollection<string> ActorNames { get; set; }
-		public ICollection<string> GenreNames { get; set; }
+		public ICollection<string> ActorNames { get; init; }
+		public ICollection<string> GenreNames { get; init; }
 	}
 }

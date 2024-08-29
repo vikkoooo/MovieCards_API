@@ -2,21 +2,21 @@
 
 namespace MovieCards_API.Model.DTO
 {
-	public class MovieForCreationDTO
+	public record MovieForCreationDTO
 	{
 		[Required]
-		public string Title { get; set; }
+		public string Title { get; init; }
 		[Required]
-		public int Rating { get; set; }
+		public int Rating { get; init; }
 		[Required]
-		public string ReleaseDate { get; set; }
+		public string ReleaseDate { get; init; }
 		[Required]
-		public string Description { get; set; }
+		public string Description { get; init; }
 		[Required]
-		public int DirectorId { get; set; }
+		public int DirectorId { get; init; }
 		[Required]
-		public ICollection<int> ActorIds { get; set; }
+		public ICollection<int> ActorIds { get; init; }
 		[Required]
-		public ICollection<int> GenreIds { get; set; }
+		public ICollection<int> GenreIds { get; init; }
 	}
 }

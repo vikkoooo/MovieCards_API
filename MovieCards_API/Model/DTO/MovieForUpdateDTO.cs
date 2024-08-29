@@ -1,13 +1,13 @@
 ﻿namespace MovieCards_API.Model.DTO
 {
-	public class MovieForUpdateDTO
+	public record MovieForUpdateDTO
 	{
-		public string? Title { get; set; }
-		public int Rating { get; set; }
-		public string? ReleaseDate { get; set; }
-		public string? Description { get; set; }
-		public int DirectorId { get; set; }
-		public ICollection<int>? ActorIds { get; set; }
-		public ICollection<int>? GenreIds { get; set; }
+		public string? Title { get; init; }
+		public int Rating { get; init; }
+		public string? ReleaseDate { get; init; }
+		public string? Description { get; init; }
+		public int DirectorId { get; init; }
+		public ICollection<int>? ActorIds { get; init; }
+		public ICollection<int>? GenreIds { get; init; }
 	}
 }
