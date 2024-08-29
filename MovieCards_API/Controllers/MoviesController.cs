@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieCards_API.Data;
 using MovieCards_API.Model.DTO;
@@ -10,59 +11,53 @@ namespace MovieCards_API.Controllers
 	[ApiController]
 	public class MoviesController : ControllerBase
 	{
-		private readonly MovieCardsContext context;
+		private readonly MovieCardsContext db;
+		private readonly IMapper mapper;
 
-		public MoviesController(MovieCardsContext context)
+		public MoviesController(MovieCardsContext db, IMapper mapper)
 		{
-			this.context = context;
+			this.db = db;
+			this.mapper = mapper;
 		}
 
 		// GET: api/movies
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<MovieDTO>>> GetMovie()
 		{
-			var dtoList = await context.Movie.Select(m => new MovieDTO
-			{
-				Title = m.Title,
-				Rating = m.Rating,
-				ReleaseDate = m.ReleaseDate,
-				Description = m.Description,
-				DirectorName = m.Director.Name,
-				ActorNames = m.Actors.Select(a => a.Name).ToList(),
-				GenreNames = m.Genres.Select(g => g.Name).ToList()
-			}).ToListAsync();
+			var movies = await db.Movie
+				.Include(d => d.Director)
+				.Include(a => a.Actors)
+				.Include(g => g.Genres)
+				.ToListAsync();
 
-			if (dtoList == null)
+			var movieDtoList = mapper.Map<IEnumerable<MovieDTO>>(movies);
+
+			if (movieDtoList == null)
 			{
 				return NotFound();
 			}
 
-			return Ok(dtoList);
+			return Ok(movieDtoList);
 		}
 
 		// GET: api/movies/5
 		[HttpGet("{id}")]
 		public async Task<ActionResult<MovieDTO>> GetMovie(int id)
 		{
-			var dto = await context.Movie
-				.Where(m => m.Id == id)
-				.Select(m => new MovieDTO
-				{
-					Title = m.Title,
-					Rating = m.Rating,
-					ReleaseDate = m.ReleaseDate,
-					Description = m.Description,
-					DirectorName = m.Director.Name,
-					ActorNames = m.Actors.Select(a => a.Name).ToList(),
-					GenreNames = m.Genres.Select(g => g.Name).ToList()
-				}).FirstOrDefaultAsync();
+			var movie = await db.Movie
+				.Include(m => m.Director)
+				.Include(m => m.Actors)
+				.Include(m => m.Genres)
+				.FirstOrDefaultAsync(m => m.Id == id);
 
-			if (dto == null)
+			if (movie == null)
 			{
 				return NotFound();
 			}
 
-			return Ok(dto);
+			var movieDto = mapper.Map<MovieDTO>(movie);
+
+			return Ok(movieDto);
 		}
 
 		// POST: api/movies
@@ -75,19 +70,19 @@ namespace MovieCards_API.Controllers
 				return BadRequest("Invalid date format. Please use YYYY-MM-DD");
 			}
 
-			var director = await context.Director.FindAsync(movieCreateDto.DirectorId);
+			var director = await db.Director.FindAsync(movieCreateDto.DirectorId);
 			if (director == null)
 			{
 				return BadRequest("Director not found");
 			}
 
-			var actors = await context.Actor.Where(a => movieCreateDto.ActorIds.Contains(a.Id)).ToListAsync();
+			var actors = await db.Actor.Where(a => movieCreateDto.ActorIds.Contains(a.Id)).ToListAsync();
 			if (actors.Count != movieCreateDto.ActorIds.Count)
 			{
 				return BadRequest("Actors not found");
 			}
 
-			var genres = await context.Genre.Where(g => movieCreateDto.GenreIds.Contains(g.Id)).ToListAsync();
+			var genres = await db.Genre.Where(g => movieCreateDto.GenreIds.Contains(g.Id)).ToListAsync();
 			if (genres.Count != movieCreateDto.GenreIds.Count)
 			{
 				return BadRequest("Genres not found");
@@ -104,8 +99,8 @@ namespace MovieCards_API.Controllers
 				Genres = genres
 			};
 
-			context.Movie.Add(movie);
-			await context.SaveChangesAsync();
+			db.Movie.Add(movie);
+			await db.SaveChangesAsync();
 
 			// return result feedback to api user
 			var resultDto = new MovieDTO
@@ -133,7 +128,7 @@ namespace MovieCards_API.Controllers
 			}
 
 			// find existing movie by id or return notfound
-			var movie = await context.Movie
+			var movie = await db.Movie
 				.Include(m => m.Director)
 				.Include(m => m.Actors)
 				.Include(m => m.Genres)
@@ -171,7 +166,7 @@ namespace MovieCards_API.Controllers
 
 			if (movieUpdateDto.DirectorId > 0)
 			{
-				var director = await context.Director.FindAsync(movieUpdateDto.DirectorId);
+				var director = await db.Director.FindAsync(movieUpdateDto.DirectorId);
 				if (director == null)
 				{
 					return BadRequest("Director not found");
@@ -181,7 +176,7 @@ namespace MovieCards_API.Controllers
 
 			if (movieUpdateDto.ActorIds != null)
 			{
-				var actors = await context.Actor.Where(a => movieUpdateDto.ActorIds.Contains(a.Id)).ToListAsync();
+				var actors = await db.Actor.Where(a => movieUpdateDto.ActorIds.Contains(a.Id)).ToListAsync();
 				if (actors.Count != movieUpdateDto.ActorIds.Count)
 				{
 					return BadRequest("Actors not found");
@@ -191,7 +186,7 @@ namespace MovieCards_API.Controllers
 
 			if (movieUpdateDto.GenreIds != null)
 			{
-				var genres = await context.Genre.Where(g => movieUpdateDto.GenreIds.Contains(g.Id)).ToListAsync();
+				var genres = await db.Genre.Where(g => movieUpdateDto.GenreIds.Contains(g.Id)).ToListAsync();
 				if (genres.Count != movieUpdateDto.GenreIds.Count)
 				{
 					return BadRequest("Genres not found");
@@ -199,11 +194,11 @@ namespace MovieCards_API.Controllers
 				movie.Genres = genres;
 			}
 
-			context.Entry(movie).State = EntityState.Modified;
+			db.Entry(movie).State = EntityState.Modified;
 
 			try
 			{
-				await context.SaveChangesAsync();
+				await db.SaveChangesAsync();
 			}
 			catch (Exception ex)
 			{
@@ -234,14 +229,14 @@ namespace MovieCards_API.Controllers
 				return BadRequest("Invalid ID");
 			}
 
-			var movie = await context.Movie.FindAsync(id);
+			var movie = await db.Movie.FindAsync(id);
 			if (movie == null)
 			{
 				return NotFound("ID not found");
 			}
 
-			context.Movie.Remove(movie);
-			await context.SaveChangesAsync();
+			db.Movie.Remove(movie);
+			await db.SaveChangesAsync();
 
 			return NoContent();
 		}
@@ -257,7 +252,7 @@ namespace MovieCards_API.Controllers
 			}
 
 			// find existing movie by id or return notfound
-			var movie = await context.Movie
+			var movie = await db.Movie
 				.Include(m => m.Director)
 				.Include(m => m.Director.ContactInformation)
 				.Include(m => m.Actors)

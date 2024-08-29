@@ -14,6 +14,7 @@ namespace MovieCards_API
 				options.UseSqlServer(builder.Configuration.GetConnectionString("MovieCardsContext") ?? throw new InvalidOperationException("Connection string 'MovieCardsContext' not found.")));
 
 			builder.Services.AddControllers();
+			builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 			var app = builder.Build();
 
 			// reset db and reseed data on startup
