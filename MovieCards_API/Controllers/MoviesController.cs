@@ -88,33 +88,18 @@ namespace MovieCards_API.Controllers
 				return BadRequest("Genres not found");
 			}
 
-			var movie = new Movie
-			{
-				Title = movieCreateDto.Title,
-				Rating = movieCreateDto.Rating,
-				ReleaseDate = releaseDate,
-				Description = movieCreateDto.Description,
-				Director = director,
-				Actors = actors,
-				Genres = genres
-			};
+			var movie = mapper.Map<Movie>(movieCreateDto);
+			movie.ReleaseDate = releaseDate;
+			movie.Director = director;
+			movie.Actors = actors;
+			movie.Genres = genres;
 
 			db.Movie.Add(movie);
 			await db.SaveChangesAsync();
 
-			// return result feedback to api user
-			var resultDto = new MovieDTO
-			{
-				Title = movie.Title,
-				Rating = movie.Rating,
-				ReleaseDate = movie.ReleaseDate,
-				Description = movie.Description,
-				DirectorName = movie.Director.Name,
-				ActorNames = movie.Actors.Select(a => a.Name).ToList(),
-				GenreNames = movie.Genres.Select(g => g.Name).ToList()
-			};
+			var movieDto = mapper.Map<MovieDTO>(movie);
 
-			return CreatedAtAction(nameof(GetMovie), new { id = movie.Id }, resultDto);
+			return CreatedAtAction(nameof(GetMovie), new { id = movie.Id }, movieDto);
 		}
 
 		// PUT: api/movies/5
