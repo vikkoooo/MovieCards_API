@@ -15,6 +15,9 @@ namespace MovieCards_API.Data
 
 			CreateMap<MovieForCreationDTO, Movie>()
 				.ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => DateTime.Parse(src.ReleaseDate)));
+
+			CreateMap<MovieForUpdateDTO, Movie>()
+				.ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => DateTime.Parse(src.ReleaseDate)));
 		}
 	}
 }

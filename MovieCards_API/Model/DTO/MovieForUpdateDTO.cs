@@ -2,6 +2,7 @@
 {
 	public record MovieForUpdateDTO
 	{
+		public int Id { get; init; }
 		public string? Title { get; init; }
 		public int Rating { get; init; }
 		public string? ReleaseDate { get; init; }

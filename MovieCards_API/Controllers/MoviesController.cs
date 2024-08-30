@@ -107,7 +107,7 @@ namespace MovieCards_API.Controllers
 		public async Task<IActionResult> PutMovie(int id, MovieForUpdateDTO movieUpdateDto)
 		{
 			// validate input param id
-			if (id <= 0)
+			if (id <= 0 || id != movieUpdateDto.Id)
 			{
 				return BadRequest("Invalid ID");
 			}
@@ -124,62 +124,43 @@ namespace MovieCards_API.Controllers
 				return NotFound("ID not found");
 			}
 
-			// check for changes in the input fields, only update if changed
-			if (!string.IsNullOrEmpty(movieUpdateDto.Title))
-			{
-				movie.Title = movieUpdateDto.Title;
-			}
-
-			if (movieUpdateDto.Rating > 0 && movieUpdateDto.Rating <= 5)
-			{
-				movie.Rating = movieUpdateDto.Rating;
-			}
-
-			if (!string.IsNullOrEmpty(movieUpdateDto.ReleaseDate))
-			{
-				if (!DateTime.TryParse(movieUpdateDto.ReleaseDate, out DateTime releaseDate))
-				{
-					return BadRequest("Invalid date format. Please use YYYY-MM-DD");
-				}
-				movie.ReleaseDate = releaseDate;
-			}
-
-			if (!string.IsNullOrEmpty(movieUpdateDto.Description))
-			{
-				movie.Description = movieUpdateDto.Description;
-			}
+			Director director = new Director();
+			List<Actor> actors = new List<Actor>();
+			List<Genre> genres = new List<Genre>();
 
 			if (movieUpdateDto.DirectorId > 0)
 			{
-				var director = await db.Director.FindAsync(movieUpdateDto.DirectorId);
+				director = await db.Director.FindAsync(movieUpdateDto.DirectorId);
 				if (director == null)
 				{
 					return BadRequest("Director not found");
 				}
-				movie.DirectorId = movieUpdateDto.DirectorId;
+
 			}
 
 			if (movieUpdateDto.ActorIds != null)
 			{
-				var actors = await db.Actor.Where(a => movieUpdateDto.ActorIds.Contains(a.Id)).ToListAsync();
+				actors = await db.Actor.Where(a => movieUpdateDto.ActorIds.Contains(a.Id)).ToListAsync();
 				if (actors.Count != movieUpdateDto.ActorIds.Count)
 				{
 					return BadRequest("Actors not found");
 				}
-				movie.Actors = actors;
+
 			}
 
 			if (movieUpdateDto.GenreIds != null)
 			{
-				var genres = await db.Genre.Where(g => movieUpdateDto.GenreIds.Contains(g.Id)).ToListAsync();
+				genres = await db.Genre.Where(g => movieUpdateDto.GenreIds.Contains(g.Id)).ToListAsync();
 				if (genres.Count != movieUpdateDto.GenreIds.Count)
 				{
 					return BadRequest("Genres not found");
 				}
-				movie.Genres = genres;
 			}
 
-			db.Entry(movie).State = EntityState.Modified;
+			mapper.Map(movieUpdateDto, movie);
+			movie.DirectorId = movieUpdateDto.DirectorId;
+			movie.Actors = actors;
+			movie.Genres = genres;
 
 			try
 			{
@@ -191,18 +172,9 @@ namespace MovieCards_API.Controllers
 			}
 
 			// return result feedback to api user
-			var resultDto = new MovieDTO
-			{
-				Title = movie.Title,
-				Rating = movie.Rating,
-				ReleaseDate = movie.ReleaseDate,
-				Description = movie.Description,
-				DirectorName = movie.Director.Name,
-				ActorNames = movie.Actors.Select(a => a.Name).ToList(),
-				GenreNames = movie.Genres.Select(g => g.Name).ToList()
-			};
+			var movieDto = mapper.Map<MovieDTO>(movie);
 
-			return Ok(resultDto);
+			return Ok(movieDto);
 		}
 
 		// DELETE: api/movies/5
