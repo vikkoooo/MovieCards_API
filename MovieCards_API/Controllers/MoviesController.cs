@@ -221,19 +221,7 @@ namespace MovieCards_API.Controllers
 				return NotFound("ID not found");
 			}
 
-			var movieDetailsDto = new MovieDetailsDTO
-			{
-				Title = movie.Title,
-				Rating = movie.Rating,
-				ReleaseDate = movie.ReleaseDate,
-				Description = movie.Description,
-				DirectorName = movie.Director.Name,
-				DirectorDateOfBirth = movie.Director.DateOfBirth,
-				DirectorEmail = movie.Director.ContactInformation.Email,
-				DirectorPhoneNumber = movie.Director.ContactInformation.PhoneNumber,
-				ActorNames = movie.Actors.Select(a => a.Name).ToList(),
-				GenreNames = movie.Genres.Select(g => g.Name).ToList()
-			};
+			var movieDetailsDto = mapper.Map<MovieDetailsDTO>(movie);
 
 			return Ok(movieDetailsDto);
 		}
