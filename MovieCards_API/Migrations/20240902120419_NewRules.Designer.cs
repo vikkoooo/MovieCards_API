@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MovieCards_API.Data;
 
@@ -11,9 +12,11 @@ using MovieCards_API.Data;
 namespace MovieCards_API.Migrations
 {
     [DbContext(typeof(MovieCardsContext))]
-    partial class MovieCardsContextModelSnapshot : ModelSnapshot
+    [Migration("20240902120419_NewRules")]
+    partial class NewRules
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,7 @@ namespace MovieCards_API.Migrations
 
                     b.HasIndex("MoviesId");
 
-                    b.ToTable("ActorMovie", (string)null);
+                    b.ToTable("ActorMovie");
                 });
 
             modelBuilder.Entity("GenreMovie", b =>
@@ -49,7 +52,7 @@ namespace MovieCards_API.Migrations
 
                     b.HasIndex("MoviesId");
 
-                    b.ToTable("GenreMovie", (string)null);
+                    b.ToTable("GenreMovie");
                 });
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.Actor", b =>
@@ -70,7 +73,7 @@ namespace MovieCards_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Actor", (string)null);
+                    b.ToTable("Actor");
                 });
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.ContactInformation", b =>
@@ -97,7 +100,7 @@ namespace MovieCards_API.Migrations
                     b.HasIndex("DirectorId")
                         .IsUnique();
 
-                    b.ToTable("ContactInformation", (string)null);
+                    b.ToTable("ContactInformation");
                 });
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.Director", b =>
@@ -118,7 +121,7 @@ namespace MovieCards_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Director", (string)null);
+                    b.ToTable("Director");
                 });
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.Genre", b =>
@@ -136,7 +139,7 @@ namespace MovieCards_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genre", (string)null);
+                    b.ToTable("Genre");
                 });
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.Movie", b =>
@@ -169,7 +172,7 @@ namespace MovieCards_API.Migrations
 
                     b.HasIndex("DirectorId");
 
-                    b.ToTable("Movie", (string)null);
+                    b.ToTable("Movie");
                 });
 
             modelBuilder.Entity("ActorMovie", b =>

@@ -15,6 +15,7 @@ namespace MovieCards_API
 
 			builder.Services.AddControllers();
 			builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+			builder.Services.AddScoped<ValidationService>();
 			var app = builder.Build();
 
 			// reset db and reseed data on startup

@@ -13,11 +13,9 @@ namespace MovieCards_API.Data
 				.ForMember(dest => dest.ActorNames, opt => opt.MapFrom(src => src.Actors.Select(a => a.Name)))
 				.ForMember(dest => dest.GenreNames, opt => opt.MapFrom(src => src.Genres.Select(g => g.Name)));
 
-			CreateMap<MovieForCreationDTO, Movie>()
-				.ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => DateTime.Parse(src.ReleaseDate)));
+			CreateMap<MovieForCreationDTO, Movie>();
 
-			CreateMap<MovieForUpdateDTO, Movie>()
-				.ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => DateTime.Parse(src.ReleaseDate)));
+			CreateMap<MovieForUpdateDTO, Movie>();
 
 			CreateMap<Movie, MovieDetailsDTO>()
 				.ForMember(dest => dest.DirectorName, opt => opt.MapFrom(src => src.Director.Name))
