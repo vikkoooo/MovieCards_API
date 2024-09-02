@@ -26,6 +26,10 @@ namespace MovieCards_API.Data
 				.ForMember(dest => dest.DirectorPhoneNumber, opt => opt.MapFrom(src => src.Director.ContactInformation.PhoneNumber))
 				.ForMember(dest => dest.ActorNames, opt => opt.MapFrom(src => src.Actors.Select(a => a.Name)))
 				.ForMember(dest => dest.GenreNames, opt => opt.MapFrom(src => src.Genres.Select(g => g.Name)));
+
+			CreateMap<Director, DirectorDTO>();
+			CreateMap<Actor, ActorDTO>();
+			CreateMap<Genre, GenreDTO>();
 		}
 	}
 }
