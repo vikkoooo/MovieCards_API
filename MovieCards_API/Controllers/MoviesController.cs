@@ -24,13 +24,61 @@ namespace MovieCards_API.Controllers
 
 		// GET: api/movies
 		[HttpGet]
-		public async Task<ActionResult<IEnumerable<MovieDTO>>> GetMovie()
+		public async Task<ActionResult<IEnumerable<MovieDTO>>> GetMovie(
+
+			[FromQuery] string? title = null,
+			[FromQuery] string? genre = null,
+			[FromQuery] string? actorName = null,
+			[FromQuery] string? directorName = null,
+			[FromQuery] DateTime? releaseDate = null,
+			[FromQuery] bool includeActors = false,
+			[FromQuery] bool includeDirector = false,
+			[FromQuery] bool includeGenre = false)
 		{
-			var movies = await db.Movie
-				.Include(d => d.Director)
-				.Include(a => a.Actors)
-				.Include(g => g.Genres)
-				.ToListAsync();
+			// Create and build query
+			var query = db.Movie.AsQueryable();
+
+			if (!string.IsNullOrEmpty(title))
+			{
+				query = query.Where(m => m.Title.Contains(title));
+			}
+
+			if (!string.IsNullOrEmpty(genre))
+			{
+				query = query.Where(m => m.Genres.Any(g => g.Name.Contains(genre)));
+			}
+
+			if (!string.IsNullOrEmpty(actorName))
+			{
+				query = query.Where(m => m.Actors.Any(a => a.Name.Contains(actorName)));
+			}
+
+			if (!string.IsNullOrEmpty(directorName))
+			{
+				query = query.Where(m => m.Director.Name.Contains(directorName));
+			}
+
+			if (releaseDate.HasValue)
+			{
+				query = query.Where(m => m.ReleaseDate.Date == releaseDate.Value.Date);
+			}
+
+			if (includeActors)
+			{
+				query = query.Include(m => m.Actors);
+			}
+
+			if (includeDirector)
+			{
+				query = query.Include(m => m.Director);
+			}
+
+			if (includeGenre)
+			{
+				query = query.Include(m => m.Genres);
+			}
+
+			var movies = await query.ToListAsync();
 
 			var movieDtoList = mapper.Map<IEnumerable<MovieDTO>>(movies);
 
