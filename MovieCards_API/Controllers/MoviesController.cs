@@ -33,11 +33,14 @@ namespace MovieCards_API.Controllers
 			[FromQuery] DateTime? releaseDate = null,
 			[FromQuery] bool includeActors = false,
 			[FromQuery] bool includeDirector = false,
-			[FromQuery] bool includeGenre = false)
+			[FromQuery] bool includeGenre = false,
+			[FromQuery] string? sortBy = null,
+			[FromQuery] string? sortOrder = null)
 		{
 			// Create and build query
 			var query = db.Movie.AsQueryable();
 
+			// filter params
 			if (!string.IsNullOrEmpty(title))
 			{
 				query = query.Where(m => m.Title.Contains(title));
@@ -78,8 +81,62 @@ namespace MovieCards_API.Controllers
 				query = query.Include(m => m.Genres);
 			}
 
-			var movies = await query.ToListAsync();
+			// sorting
+			if (!string.IsNullOrEmpty(sortBy))
+			{
+				if (string.IsNullOrEmpty(sortOrder))
+				{
+					return BadRequest("sortOrder is required when using sortBy.");
+				}
 
+				sortOrder = sortOrder.ToLower();
+
+				if (sortOrder != "asc" && sortOrder != "desc")
+				{
+					return BadRequest("Invalid sortOrder parameter. Valid options are: 'asc', 'desc'.");
+				}
+
+				if (sortBy.Equals("title", StringComparison.OrdinalIgnoreCase))
+				{
+					if (sortOrder == "desc")
+					{
+						query = query.OrderByDescending(m => m.Title);
+					}
+					else if (sortOrder == "asc")
+					{
+						query = query.OrderBy(m => m.Title);
+					}
+				}
+				else if (sortBy.Equals("releasedate", StringComparison.OrdinalIgnoreCase))
+				{
+					if (sortOrder == "desc")
+					{
+						query = query.OrderByDescending(m => m.ReleaseDate);
+					}
+					else if (sortOrder == "asc")
+					{
+						query = query.OrderBy(m => m.ReleaseDate);
+					}
+				}
+				else if (sortBy.Equals("rating", StringComparison.OrdinalIgnoreCase))
+				{
+					if (sortOrder == "desc")
+					{
+						query = query.OrderByDescending(m => m.Rating);
+					}
+					else if (sortOrder == "asc")
+					{
+						query = query.OrderBy(m => m.Rating);
+					}
+				}
+				else
+				{
+					return BadRequest("Invalid sortBy parameter. Valid options are: 'title', 'releaseDate', 'rating'.");
+				}
+			}
+
+			// run query 
+			var movies = await query.ToListAsync();
 			var movieDtoList = mapper.Map<IEnumerable<MovieDTO>>(movies);
 
 			if (movieDtoList == null)
