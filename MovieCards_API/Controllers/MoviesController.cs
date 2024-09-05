@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MovieCards_API.Data;
 using MovieCards_API.Model.DTO;
 using MovieCards_API.Model.Entities;
+using NuGet.Packaging;
 
 namespace MovieCards_API.Controllers
 {
@@ -285,6 +286,52 @@ namespace MovieCards_API.Controllers
 			var movieDetailsDto = mapper.Map<MovieDetailsDTO>(movie);
 
 			return Ok(movieDetailsDto);
+		}
+
+		// POST: api/movies/5/actors
+		[HttpPost("{id}/actors")]
+		public async Task<ActionResult<MovieDTO>> AddActorsToMovie(int id, List<ActorForMovieDTO> actorDtos)
+		{
+			// find movie by input id
+			var movie = await db.Movie
+				.Include(m => m.Actors)
+				.FirstOrDefaultAsync(m => m.Id == id);
+
+			if (movie == null)
+			{
+				return NotFound("Movie not found");
+			}
+
+			var actorsToAdd = new List<Actor>();
+			foreach (var actorDto in actorDtos)
+			{
+				// find or create new actor, if success we continue, else send error message
+				var newActor = await validation.GetOrCreateActorAsync(actorDto);
+
+				// send error message if not valid response 
+				if (!newActor.IsValid)
+				{
+					return BadRequest(newActor.Message);
+				}
+
+				var actor = newActor.Actor; // set actor
+
+				// check for duplicated actors on same movie
+				if (movie.Actors.Any(a => a.Id == actor.Id))
+				{
+					return BadRequest($"Actor {actor.Name} is already associated with this movie");
+				}
+
+				actorsToAdd.Add(actor);
+			}
+
+			// update movie with actors list
+			movie.Actors.AddRange(actorsToAdd);
+
+			await db.SaveChangesAsync();
+
+			var movieDto = mapper.Map<MovieDTO>(movie);
+			return Ok(movieDto);
 		}
 	}
 }

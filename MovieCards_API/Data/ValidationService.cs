@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MovieCards_API.Model.DTO;
+using MovieCards_API.Model.Entities;
 
 namespace MovieCards_API.Data
 {
@@ -163,6 +164,40 @@ namespace MovieCards_API.Data
 			}
 
 			return (true, string.Empty);
+		}
+		public async Task<(bool IsValid, string Message, Actor? Actor)> GetOrCreateActorAsync(ActorForMovieDTO actorDto)
+		{
+			Actor? actor = null;
+
+			// find the actor by ID if provided
+			if (actorDto.Id.HasValue)
+			{
+				actor = await db.Actor.FindAsync(actorDto.Id.Value);
+				if (actor == null)
+				{
+					return (false, $"Actor with ID {actorDto.Id} not found", null);
+				}
+			}
+			else
+			{
+				// no id was provided - check for duplicates
+				actor = await db.Actor.FirstOrDefaultAsync(a => a.Name == actorDto.Name && a.DateOfBirth == actorDto.DateOfBirth);
+
+				// if actor still null, means actor doesnt exist, create 
+				if (actor == null)
+				{
+					actor = new Actor
+					{
+						Name = actorDto.Name,
+						DateOfBirth = actorDto.DateOfBirth
+					};
+
+					// add to db
+					db.Actor.Add(actor);
+				}
+			}
+
+			return (true, string.Empty, actor);
 		}
 	}
 }
