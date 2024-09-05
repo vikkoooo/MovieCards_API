@@ -13,7 +13,7 @@ namespace MovieCards_API
 			builder.Services.AddDbContext<MovieCardsContext>(options =>
 				options.UseSqlServer(builder.Configuration.GetConnectionString("MovieCardsContext") ?? throw new InvalidOperationException("Connection string 'MovieCardsContext' not found.")));
 
-			builder.Services.AddControllers();
+			builder.Services.AddControllers().AddNewtonsoftJson();
 			builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 			builder.Services.AddScoped<ValidationService>();
 			var app = builder.Build();

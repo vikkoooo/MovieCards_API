@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieCards_API.Data;
@@ -332,6 +333,44 @@ namespace MovieCards_API.Controllers
 
 			var movieDto = mapper.Map<MovieDTO>(movie);
 			return Ok(movieDto);
+		}
+
+		// PATCH: api/movies/5
+		[HttpPatch("{id}")]
+		public async Task<ActionResult> PatchMovie(int id, JsonPatchDocument<MovieForPatchDTO> patchDocument)
+		{
+			// make sure we get input
+			if (patchDocument == null)
+			{
+				return BadRequest("Patch document is null");
+			}
+
+			// find movie in db
+			var movie = await db.Movie.FindAsync(id);
+			if (movie == null)
+			{
+				return NotFound("Movie not found");
+			}
+
+			// make a MovieForPatchDTO to "start with"
+			var moviePatchDto = mapper.Map<MovieForPatchDTO>(movie);
+
+			// change state in the DTO
+			patchDocument.ApplyTo(moviePatchDto, ModelState);
+
+			if (!ModelState.IsValid)
+			{
+				return UnprocessableEntity(ModelState);
+			}
+
+			// map updated dto back to movie and save
+			mapper.Map(moviePatchDto, movie);
+			await db.SaveChangesAsync();
+
+			// return user feedback
+			var updatedMovieDto = mapper.Map<MovieDetailsDTO>(movie);
+
+			return Ok(updatedMovieDto);
 		}
 	}
 }

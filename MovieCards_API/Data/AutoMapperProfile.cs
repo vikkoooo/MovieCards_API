@@ -17,6 +17,8 @@ namespace MovieCards_API.Data
 
 			CreateMap<MovieForUpdateDTO, Movie>();
 
+			CreateMap<Movie, MovieForPatchDTO>().ReverseMap();
+
 			CreateMap<Movie, MovieDetailsDTO>()
 				.ForMember(dest => dest.DirectorName, opt => opt.MapFrom(src => src.Director.Name))
 				.ForMember(dest => dest.DirectorDateOfBirth, opt => opt.MapFrom(src => src.Director.DateOfBirth))
