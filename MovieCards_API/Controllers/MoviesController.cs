@@ -173,6 +173,14 @@ namespace MovieCards_API.Controllers
 		[HttpPost]
 		public async Task<ActionResult<MovieDTO>> PostMovie(MovieForCreationDTO movieCreateDto)
 		{
+			// duplicate check
+			var existingMovie = await db.Movie.FirstOrDefaultAsync(m => m.Title == movieCreateDto.Title);
+
+			if (existingMovie != null)
+			{
+				return Conflict($"A movie with the title '{movieCreateDto.Title}' already exists");
+			}
+
 			var validationResult = await validation.ValidateMovieForCreationAsync(movieCreateDto);
 			if (!validationResult.IsValid)
 			{
@@ -200,6 +208,14 @@ namespace MovieCards_API.Controllers
 			if (id <= 0 || id != movieUpdateDto.Id)
 			{
 				return BadRequest("Invalid ID");
+			}
+
+			// duplicate check
+			var existingMovie = await db.Movie.FirstOrDefaultAsync(m => m.Title == movieUpdateDto.Title && m.Id != id);
+
+			if (existingMovie != null)
+			{
+				return Conflict($"A movie with the title '{movieUpdateDto.Title}' already exists");
 			}
 
 			var validationResult = await validation.ValidateMovieForUpdateAsync(movieUpdateDto, id);
