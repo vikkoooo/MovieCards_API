@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MovieCards.Domain.Entities;
+using MovieCards.Infrastructure.Data;
 using MovieCards_API.Model.DTO;
-using MovieCards_API.Model.Entities;
 
 namespace MovieCards_API.Data
 {

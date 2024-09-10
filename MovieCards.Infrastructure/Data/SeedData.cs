@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using Microsoft.EntityFrameworkCore;
-using MovieCards_API.Model.Entities;
+using MovieCards.Domain.Entities;
+using MovieCards.Infrastructure.Data;
 
 namespace MovieCards_API.Data
 {
@@ -8,7 +9,7 @@ namespace MovieCards_API.Data
 	{
 		private static Faker faker = new Faker("sv");
 
-		internal static async Task InitAsync(MovieCardsContext context)
+		public static async Task InitAsync(MovieCardsContext context)
 		{
 			// check if data already exists
 			if (await context.Movie.AnyAsync())

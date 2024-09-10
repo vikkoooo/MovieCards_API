@@ -2,9 +2,10 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MovieCards.Domain.Entities;
+using MovieCards.Infrastructure.Data;
 using MovieCards_API.Data;
 using MovieCards_API.Model.DTO;
-using MovieCards_API.Model.Entities;
 using NuGet.Packaging;
 
 namespace MovieCards_API.Controllers

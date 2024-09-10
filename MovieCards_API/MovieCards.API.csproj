@@ -19,4 +19,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MovieCards.Domain\MovieCards.Domain.csproj" />
+    <ProjectReference Include="..\MovieCards.Infrastructure\MovieCards.Infrastructure.csproj" />
+    <ProjectReference Include="..\MovieCards.Service\MovieCards.Service.csproj" />
+  </ItemGroup>
+
 </Project>

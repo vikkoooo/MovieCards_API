@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using MovieCards.Domain.Entities;
 using MovieCards_API.Model.DTO;
-using MovieCards_API.Model.Entities;
 
 namespace MovieCards_API.Data
 {

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MovieCards.Infrastructure.Data;
 using MovieCards_API.Data;
 
 namespace MovieCards_API
