@@ -3,20 +3,18 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MovieCards_API.Data;
+using MovieCards.Infrastructure.Data;
+
 
 #nullable disable
 
 namespace MovieCards_API.Migrations
 {
     [DbContext(typeof(MovieCardsContext))]
-    [Migration("20240823115209_Init")]
-    partial class Init
+    partial class MovieCardsContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,7 +35,7 @@ namespace MovieCards_API.Migrations
 
                     b.HasIndex("MoviesId");
 
-                    b.ToTable("ActorMovie");
+                    b.ToTable("ActorMovie", (string)null);
                 });
 
             modelBuilder.Entity("GenreMovie", b =>
@@ -52,7 +50,7 @@ namespace MovieCards_API.Migrations
 
                     b.HasIndex("MoviesId");
 
-                    b.ToTable("GenreMovie");
+                    b.ToTable("GenreMovie", (string)null);
                 });
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.Actor", b =>
@@ -68,11 +66,12 @@ namespace MovieCards_API.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Actor");
+                    b.ToTable("Actor", (string)null);
                 });
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.ContactInformation", b =>
@@ -99,7 +98,7 @@ namespace MovieCards_API.Migrations
                     b.HasIndex("DirectorId")
                         .IsUnique();
 
-                    b.ToTable("ContactInformation");
+                    b.ToTable("ContactInformation", (string)null);
                 });
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.Director", b =>
@@ -115,11 +114,12 @@ namespace MovieCards_API.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Director");
+                    b.ToTable("Director", (string)null);
                 });
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.Genre", b =>
@@ -132,11 +132,12 @@ namespace MovieCards_API.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genre");
+                    b.ToTable("Genre", (string)null);
                 });
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.Movie", b =>
@@ -148,8 +149,8 @@ namespace MovieCards_API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("DirectorId")
                         .HasColumnType("int");
@@ -162,13 +163,14 @@ namespace MovieCards_API.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DirectorId");
 
-                    b.ToTable("Movie");
+                    b.ToTable("Movie", (string)null);
                 });
 
             modelBuilder.Entity("ActorMovie", b =>
@@ -225,8 +227,7 @@ namespace MovieCards_API.Migrations
 
             modelBuilder.Entity("MovieCards_API.Model.Entities.Director", b =>
                 {
-                    b.Navigation("ContactInformation")
-                        .IsRequired();
+                    b.Navigation("ContactInformation");
 
                     b.Navigation("Movies");
                 });
