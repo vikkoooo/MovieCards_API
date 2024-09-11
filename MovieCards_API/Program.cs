@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using MovieCards.Domain.Contracts;
 using MovieCards.Infrastructure.Data;
 using MovieCards.Infrastructure.Repositories;
 using MovieCards_API.Data;
@@ -16,13 +15,12 @@ namespace MovieCards_API
 			builder.Services.AddDbContext<MovieCardsContext>(options =>
 				options.UseSqlServer(builder.Configuration.GetConnectionString("MovieCardsContext") ?? throw new InvalidOperationException("Connection string 'MovieCardsContext' not found.")));
 
-			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-			builder.Services.AddScoped<IMovieRepository, MovieRepository>();
-			builder.Services.AddScoped<IDirectorRepository, DirectorRepository>();
-			builder.Services.AddScoped<IActorRepository, ActorRepository>();
-
 			builder.Services.AddControllers().AddNewtonsoftJson();
 			builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+			builder.Services.AddScoped<MovieRepository>();
+			builder.Services.AddScoped<DirectorRepository>();
+			builder.Services.AddScoped<ActorRepository>();
+			builder.Services.AddScoped<GenreRepository>();
 			builder.Services.AddScoped<ValidationService>();
 
 			var app = builder.Build();

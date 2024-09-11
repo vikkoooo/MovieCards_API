@@ -1,47 +1,51 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MovieCards.Domain.Contracts;
 using MovieCards.Domain.Entities;
 using MovieCards.Infrastructure.Data;
 
 namespace MovieCards.Infrastructure.Repositories
 {
-	public class DirectorRepository : IDirectorRepository
+	public class DirectorRepository
 	{
-		private readonly MovieCardsContext context;
+		private readonly MovieCardsContext db;
 
-		public DirectorRepository(MovieCardsContext context)
+		public DirectorRepository(MovieCardsContext db)
 		{
-			this.context = context;
+			this.db = db;
 		}
 
 		public async Task<IEnumerable<Director>> GetAllDirectorsAsync()
 		{
-			return await context.Director.ToListAsync();
+			return await db.Director.ToListAsync();
 		}
 
 		public async Task<Director?> GetDirectorByIdAsync(int id)
 		{
-			return await context.Director.FindAsync(id);
+			return await db.Director.FindAsync(id);
+		}
+
+		public async Task<Director?> GetByIdAsync(int id)
+		{
+			return await db.Director.FirstOrDefaultAsync(d => d.Id == id);
 		}
 
 		public async Task AddDirectorAsync(Director director)
 		{
-			await context.Director.AddAsync(director);
+			await db.Director.AddAsync(director);
 		}
 
 		public void UpdateDirector(Director director)
 		{
-			context.Director.Update(director);
+			db.Director.Update(director);
 		}
 
 		public void DeleteDirector(Director director)
 		{
-			context.Director.Remove(director);
+			db.Director.Remove(director);
 		}
 
 		public async Task<bool> DirectorExistsAsync(int id)
 		{
-			return await context.Director.AnyAsync(d => d.Id == id);
+			return await db.Director.AnyAsync(d => d.Id == id);
 		}
 	}
 }

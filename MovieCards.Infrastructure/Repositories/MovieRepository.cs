@@ -1,22 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MovieCards.Domain.Contracts;
 using MovieCards.Domain.Entities;
 using MovieCards.Infrastructure.Data;
 
 namespace MovieCards.Infrastructure.Repositories
 {
-	public class MovieRepository : IMovieRepository
+	public class MovieRepository
 	{
-		private readonly MovieCardsContext context;
+		private readonly MovieCardsContext db;
 
-		public MovieRepository(MovieCardsContext context)
+		public MovieRepository(MovieCardsContext db)
 		{
-			this.context = context;
+			this.db = db;
+		}
+
+		public IQueryable<Movie> GetAllMovies()
+		{
+			return db.Movie.AsQueryable();
 		}
 
 		public async Task<IEnumerable<Movie>> GetAllMoviesAsync()
 		{
-			return await context.Movie
+			return await db.Movie
 				.Include(m => m.Director)
 				.Include(m => m.Actors)
 				.Include(m => m.Genres)
@@ -25,31 +29,55 @@ namespace MovieCards.Infrastructure.Repositories
 
 		public async Task<Movie?> GetMovieByIdAsync(int id)
 		{
-			return await context.Movie
+			return await db.Movie
 				.Include(m => m.Director)
 				.Include(m => m.Actors)
 				.Include(m => m.Genres)
 				.FirstOrDefaultAsync(m => m.Id == id);
 		}
 
+		public async Task<Movie?> GetByIdAsync(int id)
+		{
+			return await db.Movie
+				.Include(m => m.Director)
+				.Include(m => m.Actors)
+				.Include(m => m.Genres)
+				.FirstOrDefaultAsync(m => m.Id == id);
+		}
+
+		public async Task<Movie?> GetByTitleAsync(string title)
+		{
+			return await db.Movie.FirstOrDefaultAsync(m => m.Title == title);
+		}
+
 		public async Task AddMovieAsync(Movie movie)
 		{
-			await context.Movie.AddAsync(movie);
+			await db.Movie.AddAsync(movie);
+		}
+
+		public async Task AddAsync(Movie movie)
+		{
+			await db.Movie.AddAsync(movie);
 		}
 
 		public void UpdateMovie(Movie movie)
 		{
-			context.Movie.Update(movie);
+			db.Movie.Update(movie);
 		}
 
 		public void DeleteMovie(Movie movie)
 		{
-			context.Movie.Remove(movie);
+			db.Movie.Remove(movie);
 		}
 
 		public async Task<bool> MovieExistsAsync(int id)
 		{
-			return await context.Movie.AnyAsync(m => m.Id == id);
+			return await db.Movie.AnyAsync(m => m.Id == id);
+		}
+
+		public async Task SaveChangesAsync()
+		{
+			await db.SaveChangesAsync();
 		}
 	}
 }

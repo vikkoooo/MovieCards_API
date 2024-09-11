@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieCards.Domain.Entities;
-using MovieCards.Infrastructure.Data;
+using MovieCards.Infrastructure.Repositories;
 using MovieCards_API.Data;
 using MovieCards_API.Model.DTO;
 using NuGet.Packaging;
@@ -14,13 +14,19 @@ namespace MovieCards_API.Controllers
 	[ApiController]
 	public class MoviesController : ControllerBase
 	{
-		private readonly MovieCardsContext db;
+		private readonly MovieRepository movieRepository;
+		private readonly ActorRepository actorRepository;
+		private readonly DirectorRepository directorRepository;
+		private readonly GenreRepository genreRepository;
 		private readonly IMapper mapper;
 		private readonly ValidationService validation;
 
-		public MoviesController(MovieCardsContext db, IMapper mapper, ValidationService validation)
+		public MoviesController(MovieRepository movieRepository, ActorRepository actorRepository, DirectorRepository directorRepository, GenreRepository genreRepository, IMapper mapper, ValidationService validation)
 		{
-			this.db = db;
+			this.movieRepository = movieRepository;
+			this.actorRepository = actorRepository;
+			this.directorRepository = directorRepository;
+			this.genreRepository = genreRepository;
 			this.mapper = mapper;
 			this.validation = validation;
 		}
@@ -41,7 +47,8 @@ namespace MovieCards_API.Controllers
 			[FromQuery] string? sortOrder = null)
 		{
 			// Create and build query
-			var query = db.Movie.AsQueryable();
+			//var query = db.Movie.AsQueryable();
+			var query = movieRepository.GetAllMovies();
 
 			// filter params
 			if (!string.IsNullOrEmpty(title))
@@ -154,11 +161,12 @@ namespace MovieCards_API.Controllers
 		[HttpGet("{id}")]
 		public async Task<ActionResult<MovieDTO>> GetMovie(int id)
 		{
-			var movie = await db.Movie
-				.Include(m => m.Director)
-				.Include(m => m.Actors)
-				.Include(m => m.Genres)
-				.FirstOrDefaultAsync(m => m.Id == id);
+			//var movie = await db.Movie
+			//	.Include(m => m.Director)
+			//	.Include(m => m.Actors)
+			//	.Include(m => m.Genres)
+			//	.FirstOrDefaultAsync(m => m.Id == id);
+			var movie = await movieRepository.GetByIdAsync(id);
 
 			if (movie == null)
 			{
@@ -175,8 +183,8 @@ namespace MovieCards_API.Controllers
 		public async Task<ActionResult<MovieDTO>> PostMovie(MovieForCreationDTO movieCreateDto)
 		{
 			// duplicate check
-			var existingMovie = await db.Movie.FirstOrDefaultAsync(m => m.Title == movieCreateDto.Title);
-
+			// var existingMovie = await db.Movie.FirstOrDefaultAsync(m => m.Title == movieCreateDto.Title);
+			var existingMovie = await movieRepository.GetByTitleAsync(movieCreateDto.Title);
 			if (existingMovie != null)
 			{
 				return Conflict($"A movie with the title '{movieCreateDto.Title}' already exists");
@@ -189,12 +197,17 @@ namespace MovieCards_API.Controllers
 			}
 
 			var movie = mapper.Map<Movie>(movieCreateDto);
-			movie.Director = await db.Director.FindAsync(movieCreateDto.DirectorId);
-			movie.Actors = await db.Actor.Where(a => movieCreateDto.ActorIds.Contains(a.Id)).ToListAsync();
-			movie.Genres = await db.Genre.Where(g => movieCreateDto.GenreIds.Contains(g.Id)).ToListAsync();
+			//movie.Director = await db.Director.FindAsync(movieCreateDto.DirectorId);
+			//movie.Actors = await db.Actor.Where(a => movieCreateDto.ActorIds.Contains(a.Id)).ToListAsync();
+			//movie.Genres = await db.Genre.Where(g => movieCreateDto.GenreIds.Contains(g.Id)).ToListAsync();
+			movie.Director = await directorRepository.GetByIdAsync(movieCreateDto.DirectorId);
+			movie.Actors = await actorRepository.GetActorsByIdsAsync(movieCreateDto.ActorIds);
+			movie.Genres = await genreRepository.GetGenresByIdsAsync(movieCreateDto.GenreIds);
 
-			db.Movie.Add(movie);
-			await db.SaveChangesAsync();
+			//db.Movie.Add(movie);
+			//await db.SaveChangesAsync();
+			await movieRepository.AddAsync(movie);
+			await movieRepository.SaveChangesAsync();
 
 			var movieDto = mapper.Map<MovieDTO>(movie);
 
@@ -212,8 +225,8 @@ namespace MovieCards_API.Controllers
 			}
 
 			// duplicate check
-			var existingMovie = await db.Movie.FirstOrDefaultAsync(m => m.Title == movieUpdateDto.Title && m.Id != id);
-
+			//var existingMovie = await db.Movie.FirstOrDefaultAsync(m => m.Title == movieUpdateDto.Title && m.Id != id);
+			var existingMovie = await movieRepository.GetByTitleAsync(movieUpdateDto.Title);
 			if (existingMovie != null)
 			{
 				return Conflict($"A movie with the title '{movieUpdateDto.Title}' already exists");
@@ -226,25 +239,29 @@ namespace MovieCards_API.Controllers
 			}
 
 			// find existing movie by id or return notfound
-			var movie = await db.Movie
-				.Include(m => m.Director)
-				.Include(m => m.Actors)
-				.Include(m => m.Genres)
-				.FirstOrDefaultAsync(m => m.Id == id);
-
+			//var movie = await db.Movie
+			//	.Include(m => m.Director)
+			//	.Include(m => m.Actors)
+			//	.Include(m => m.Genres)
+			//	.FirstOrDefaultAsync(m => m.Id == id);
+			var movie = await movieRepository.GetByIdAsync(id);
 			if (movie == null)
 			{
 				return NotFound("ID not found");
 			}
 
 			mapper.Map(movieUpdateDto, movie);
-			movie.DirectorId = movieUpdateDto.DirectorId;
-			movie.Actors = await db.Actor.Where(a => movieUpdateDto.ActorIds.Contains(a.Id)).ToListAsync();
-			movie.Genres = await db.Genre.Where(g => movieUpdateDto.GenreIds.Contains(g.Id)).ToListAsync();
+			//movie.DirectorId = movieUpdateDto.DirectorId;
+			//movie.Actors = await db.Actor.Where(a => movieUpdateDto.ActorIds.Contains(a.Id)).ToListAsync();
+			//movie.Genres = await db.Genre.Where(g => movieUpdateDto.GenreIds.Contains(g.Id)).ToListAsync();
+			movie.Director = await directorRepository.GetByIdAsync(movieUpdateDto.DirectorId);
+			movie.Actors = await actorRepository.GetActorsByIdsAsync(movieUpdateDto.ActorIds);
+			movie.Genres = await genreRepository.GetGenresByIdsAsync(movieUpdateDto.GenreIds);
 
 			try
 			{
-				await db.SaveChangesAsync();
+				//await db.SaveChangesAsync();
+				await movieRepository.SaveChangesAsync();
 			}
 			catch (Exception ex)
 			{
@@ -266,14 +283,17 @@ namespace MovieCards_API.Controllers
 				return BadRequest("Invalid ID");
 			}
 
-			var movie = await db.Movie.FindAsync(id);
+			//var movie = await db.Movie.FindAsync(id);
+			var movie = await movieRepository.GetByIdAsync(id);
 			if (movie == null)
 			{
 				return NotFound("ID not found");
 			}
 
-			db.Movie.Remove(movie);
-			await db.SaveChangesAsync();
+			//db.Movie.Remove(movie);
+			//await db.SaveChangesAsync();
+			movieRepository.DeleteMovie(movie);
+			await movieRepository.SaveChangesAsync();
 
 			return NoContent();
 		}
@@ -289,13 +309,13 @@ namespace MovieCards_API.Controllers
 			}
 
 			// find existing movie by id or return notfound
-			var movie = await db.Movie
-				.Include(m => m.Director)
-				.Include(m => m.Director.ContactInformation)
-				.Include(m => m.Actors)
-				.Include(m => m.Genres)
-				.FirstOrDefaultAsync(m => m.Id == id);
-
+			//var movie = await db.Movie
+			//	.Include(m => m.Director)
+			//	.Include(m => m.Director.ContactInformation)
+			//	.Include(m => m.Actors)
+			//	.Include(m => m.Genres)
+			//	.FirstOrDefaultAsync(m => m.Id == id);
+			var movie = await movieRepository.GetByIdAsync(id);
 			if (movie == null)
 			{
 				return NotFound("ID not found");
@@ -311,10 +331,10 @@ namespace MovieCards_API.Controllers
 		public async Task<ActionResult<MovieDTO>> AddActorsToMovie(int id, List<ActorForMovieDTO> actorDtos)
 		{
 			// find movie by input id
-			var movie = await db.Movie
-				.Include(m => m.Actors)
-				.FirstOrDefaultAsync(m => m.Id == id);
-
+			//var movie = await db.Movie
+			//	.Include(m => m.Actors)
+			//	.FirstOrDefaultAsync(m => m.Id == id);
+			var movie = await movieRepository.GetByIdAsync(id);
 			if (movie == null)
 			{
 				return NotFound("Movie not found");
@@ -346,7 +366,8 @@ namespace MovieCards_API.Controllers
 			// update movie with actors list
 			movie.Actors.AddRange(actorsToAdd);
 
-			await db.SaveChangesAsync();
+			//await db.SaveChangesAsync();
+			await movieRepository.SaveChangesAsync();
 
 			var movieDto = mapper.Map<MovieDTO>(movie);
 			return Ok(movieDto);
@@ -363,7 +384,8 @@ namespace MovieCards_API.Controllers
 			}
 
 			// find movie in db
-			var movie = await db.Movie.FindAsync(id);
+			//var movie = await db.Movie.FindAsync(id);
+			var movie = await movieRepository.GetByIdAsync(id);
 			if (movie == null)
 			{
 				return NotFound("Movie not found");
@@ -382,7 +404,8 @@ namespace MovieCards_API.Controllers
 
 			// map updated dto back to movie and save
 			mapper.Map(moviePatchDto, movie);
-			await db.SaveChangesAsync();
+			//await db.SaveChangesAsync();
+			await movieRepository.SaveChangesAsync();
 
 			// return user feedback
 			var updatedMovieDto = mapper.Map<MovieDetailsDTO>(movie);
