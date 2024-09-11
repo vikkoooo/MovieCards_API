@@ -17,10 +17,10 @@ namespace MovieCards_API
 
 			builder.Services.AddControllers().AddNewtonsoftJson();
 			builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-			builder.Services.AddScoped<MovieRepository>();
-			builder.Services.AddScoped<DirectorRepository>();
-			builder.Services.AddScoped<ActorRepository>();
-			builder.Services.AddScoped<GenreRepository>();
+			builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+			builder.Services.AddScoped<IDirectorRepository, DirectorRepository>();
+			builder.Services.AddScoped<IActorRepository, ActorRepository>();
+			builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 			builder.Services.AddScoped<ValidationService>();
 
 			var app = builder.Build();

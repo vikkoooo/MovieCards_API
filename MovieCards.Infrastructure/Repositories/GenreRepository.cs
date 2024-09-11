@@ -4,7 +4,7 @@ using MovieCards.Infrastructure.Data;
 
 namespace MovieCards.Infrastructure.Repositories
 {
-	public class GenreRepository
+	public class GenreRepository : IGenreRepository
 	{
 		private readonly MovieCardsContext db;
 
@@ -13,7 +13,6 @@ namespace MovieCards.Infrastructure.Repositories
 			this.db = db;
 		}
 
-		// Get genres by list of IDs
 		public async Task<List<Genre>> GetGenresByIdsAsync(IEnumerable<int> genreIds)
 		{
 			return await db.Genre.Where(g => genreIds.Contains(g.Id)).ToListAsync();

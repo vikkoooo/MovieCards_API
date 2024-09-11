@@ -14,14 +14,14 @@ namespace MovieCards_API.Controllers
 	[ApiController]
 	public class MoviesController : ControllerBase
 	{
-		private readonly MovieRepository movieRepository;
-		private readonly ActorRepository actorRepository;
-		private readonly DirectorRepository directorRepository;
-		private readonly GenreRepository genreRepository;
+		private readonly IMovieRepository movieRepository;
+		private readonly IActorRepository actorRepository;
+		private readonly IDirectorRepository directorRepository;
+		private readonly IGenreRepository genreRepository;
 		private readonly IMapper mapper;
 		private readonly ValidationService validation;
 
-		public MoviesController(MovieRepository movieRepository, ActorRepository actorRepository, DirectorRepository directorRepository, GenreRepository genreRepository, IMapper mapper, ValidationService validation)
+		public MoviesController(IMovieRepository movieRepository, IActorRepository actorRepository, IDirectorRepository directorRepository, IGenreRepository genreRepository, IMapper mapper, ValidationService validation)
 		{
 			this.movieRepository = movieRepository;
 			this.actorRepository = actorRepository;
